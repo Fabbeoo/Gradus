@@ -1,0 +1,22 @@
+<svg width="100%" viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg"><defs><mask id="imagine-text-gaps-t8morw" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="680" fill="white"/><rect x="140.19015502929688" y="428.11114501953125" width="399.6197814941406" height="90.41666412353516" fill="black" rx="2"/></mask></defs>
+
+  <rect x="90" y="90" width="500" height="500" rx="24" fill="white" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Corpo cappello -->
+  <rect x="240" y="250" width="200" height="140" rx="4" fill="#2176C7" style="fill:rgb(33, 118, 199);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Nappina curva SOTTO la scritta — va fino al punto -->
+  <path d="M540,265 C562,278 572,314 556,358 C540,400 524,440 536,492" fill="none" stroke="#3A8EE6" stroke-width="2.5" stroke-linecap="round" mask="url(#imagine-text-gaps-t8morw)" style="fill:none;stroke:rgb(58, 142, 230);color:rgb(255, 255, 255);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Falda cappello sopra tutto -->
+  <polygon points="340,175 540,265 340,355 140,265" fill="#5BA3F5" style="fill:rgb(91, 163, 245);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <polygon points="340,175 540,265 340,287 140,265" fill="#82BFFF" opacity="0.45" style="fill:rgb(130, 191, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.45;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <polygon points="340,175 540,265 340,355 140,265" fill="none" stroke="#3A8EE6" stroke-width="1" style="fill:none;stroke:rgb(58, 142, 230);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Nome GRADUS sopra il nastro -->
+  <text x="340" y="500" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" letter-spacing="6" fill="#0D2B6E" style="fill:rgb(13, 43, 110);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, &quot;Times New Roman&quot;, serif;font-size:76px;font-weight:700;text-anchor:middle;dominant-baseline:auto">GRADUS</text>
+
+  <!-- Punto dopo la S, sopra il nastro -->
+  <circle cx="536" cy="492" r="8" fill="#0D2B6E" style="fill:rgb(13, 43, 110);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+</svg>

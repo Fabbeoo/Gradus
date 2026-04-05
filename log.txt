@@ -1,0 +1,62 @@
+Launching lib/main.dart on RMX3363 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+Warning: Flutter support for your project's Gradle version (8.6.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 8.7.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at /Users/fabio/registro_voti/android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.3.0) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.6.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (/Users/fabio/registro_voti/android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (/Users/fabio/registro_voti/android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+Warning: Flutter support for your project's Kotlin version (1.9.23) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.1.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's KGP version is typically defined in the plugins block of the `settings.gradle` file (/Users/fabio/registro_voti/android/settings.gradle), by a plugin with the id of org.jetbrains.kotlin.android. 
+If you don't see a plugins block, your project was likely created with an older template version, in which case it is most likely defined in the top-level build.gradle file (/Users/fabio/registro_voti/android/build.gradle) by the ext.kotlin_version property.
+
+Warning: The plugin flutter_local_notifications requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Warning: The plugin path_provider_android requires Android SDK version 36 or higher.
+For more information about build configuration, see https://flutter.dev/to/review-gradle-config.
+Your project is configured to compile against Android SDK 34, but the following plugin(s) require to be compiled against a higher Android SDK version:
+- flutter_local_notifications compiles against Android SDK 36
+- path_provider_android compiles against Android SDK 36
+Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+Add the following to /Users/fabio/registro_voti/android/app/build.gradle.kts:
+
+    android {
+        compileSdk = 36
+        ...
+    }
+Running Gradle task 'assembleDebug'...                              7,1s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           4,8s
+E/AndroidRuntime(11131): FATAL EXCEPTION: main
+E/AndroidRuntime(11131): Process: com.fabio.gradus, PID: 11131
+E/AndroidRuntime(11131): java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.fabio.gradus/com.fabio.gradus.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.fabio.gradus.MainActivity" on path: DexPathList[[zip file "/data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/base.apk"],nativeLibraryDirectories=[/data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/lib/arm64, /data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+E/AndroidRuntime(11131): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3761)
+E/AndroidRuntime(11131): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4014)
+E/AndroidRuntime(11131): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+E/AndroidRuntime(11131): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+E/AndroidRuntime(11131): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+E/AndroidRuntime(11131): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2470)
+E/AndroidRuntime(11131): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+E/AndroidRuntime(11131): 	at android.os.Looper.loopOnce(Looper.java:240)
+E/AndroidRuntime(11131): 	at android.os.Looper.loop(Looper.java:351)
+E/AndroidRuntime(11131): 	at android.app.ActivityThread.main(ActivityThread.java:8423)
+E/AndroidRuntime(11131): 	at java.lang.reflect.Method.invoke(Native Method)
+E/AndroidRuntime(11131): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:584)
+E/AndroidRuntime(11131): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1013)
+E/AndroidRuntime(11131): Caused by: java.lang.ClassNotFoundException: Didn't find class "com.fabio.gradus.MainActivity" on path: DexPathList[[zip file "/data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/base.apk"],nativeLibraryDirectories=[/data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/lib/arm64, /data/app/~~AKuAun0xb15k_GGtq_hWKA==/com.fabio.gradus-qJ0N7toyo0xAseD4nUIjZA==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+E/AndroidRuntime(11131): 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+E/AndroidRuntime(11131): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:637)
+E/AndroidRuntime(11131): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:573)
+E/AndroidRuntime(11131): 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+E/AndroidRuntime(11131): 	at androidx.core.app.CoreComponentFactory.instantiateActivity(CoreComponentFactory.java:44)
+E/AndroidRuntime(11131): 	at android.app.Instrumentation.newActivity(Instrumentation.java:1347)
+E/AndroidRuntime(11131): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3748)
+E/AndroidRuntime(11131): 	... 12 more
