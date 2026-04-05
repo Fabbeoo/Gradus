@@ -15,3 +15,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+What's Gradus?
+Gradus is your all-in-one school companion. Track grades, calculate averages, and monitor your progress with beautiful charts. Manage your timetable, homework, tests, and oral exams — all in one place. Stay on top of your studies. 
