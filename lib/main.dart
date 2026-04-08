@@ -154,7 +154,7 @@ class _RootScreenState extends State<RootScreen> {
       case 1:
         return MaterieScreen(materie: _materie, onUpdate: _onUpdate);
       case 2:
-        return VotiScreen(materie: _materie);
+        return VotiScreen(materie: _materie, onUpdate: _onUpdate);
       case 3:
         return OrarioScreen(
           materie: _materie,

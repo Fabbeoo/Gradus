@@ -4,8 +4,9 @@ import '../models/materia.dart';
 
 class VotiScreen extends StatefulWidget {
   final List<Materia> materie;
+  final VoidCallback onUpdate; // aggiungi questo
 
-  const VotiScreen({super.key, required this.materie});
+  const VotiScreen({super.key, required this.materie, required this.onUpdate});
 
   @override
   State<VotiScreen> createState() => _VotiScreenState();
@@ -281,6 +282,7 @@ class _VotiScreenState extends State<VotiScreen>
                       materiaScelta!.voti.sort(
                         (a, b) => a.data.compareTo(b.data),
                       );
+                      widget.onUpdate();
                     });
                     Navigator.pop(context);
                   },
@@ -308,6 +310,7 @@ class _VotiScreenState extends State<VotiScreen>
           FilledButton(
             onPressed: () {
               setState(() => materia.voti.remove(voto));
+              widget.onUpdate();
               Navigator.pop(context);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
