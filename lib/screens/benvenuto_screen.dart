@@ -86,7 +86,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Indicatori pagina
+            // Page indicators shown at the top to show current page.
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Row(
@@ -109,7 +109,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
               ),
             ),
 
-            // Pagine
+            // Pages displayed in a PageView for the welcome flow.
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -126,7 +126,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Icona
+                        // Icon shown inside a circular background.
                         Container(
                           width: 120,
                           height: 120,
@@ -146,7 +146,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                         ),
                         const SizedBox(height: 40),
 
-                        // Titolo
+                        // Title text for the page.
                         Text(
                           pagina['titolo'] as String,
                           textAlign: TextAlign.center,
@@ -157,7 +157,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Descrizione
+                        // Description text explaining the feature.
                         Text(
                           pagina['descrizione'] as String,
                           textAlign: TextAlign.center,
@@ -168,7 +168,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                           ),
                         ),
 
-                        // Campo nome sull'ultima pagina
+                        // Name input field shown only on the last page.
                         if (isUltima) ...[
                           const SizedBox(height: 40),
                           TextField(
@@ -197,12 +197,12 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
               ),
             ),
 
-            // Bottoni navigazione
+            // Navigation buttons at the bottom: back and next/start.
             Padding(
               padding: const EdgeInsets.all(32),
               child: Row(
                 children: [
-                  // Bottone indietro
+                  // Back button shown when not on the first page.
                   if (_paginaCorrente > 0)
                     Expanded(
                       child: OutlinedButton(
@@ -217,7 +217,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                     ),
                   if (_paginaCorrente > 0) const SizedBox(width: 12),
 
-                  // Bottone avanti / inizia
+                  // Next or Start button that advances pages or completes the flow.
                   Expanded(
                     flex: 2,
                     child: FilledButton(

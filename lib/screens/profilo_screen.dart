@@ -29,6 +29,7 @@ class ProfiloScreen extends StatefulWidget {
 }
 
 class _ProfiloScreenState extends State<ProfiloScreen> {
+  // Open a bottom sheet to edit the student's name.
   void _modificaNome() {
     final controller = TextEditingController(text: widget.nomeStudente);
     showModalBottomSheet(
@@ -84,6 +85,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
+  // Small reusable tile used for exporting data.
   Widget _exportTile({
     required IconData icon,
     required String label,
@@ -130,6 +132,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
+  // Show a confirmation dialog before deleting data.
   void _cancellaDati({
     required String titolo,
     required String messaggio,
@@ -160,6 +163,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Compute simple statistics for display.
     final totVoti = widget.materie.fold<int>(
       0,
       (sum, m) => sum + m.voti.length,
@@ -171,7 +175,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Avatar e nome
+        // Avatar and name section with edit button.
         Center(
           child: Column(
             children: [
@@ -209,7 +213,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
         const SizedBox(height: 24),
 
-        // Statistiche
+        // Statistics grid showing counts for subjects, grades, tasks, and lessons.
         const Text(
           'Statistiche',
           style: TextStyle(
@@ -246,7 +250,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
         const SizedBox(height: 28),
 
-        // Esportazione
+        // Export section with tiles to generate PDFs.
         const Text(
           'Esportazione',
           style: TextStyle(
@@ -275,7 +279,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
               PdfService().esportaOrario(widget.lezioni, widget.nomeStudente),
         ),
 
-        // Gestione dati
+        // Data management section with destructive actions.
         const Text(
           'Gestione dati',
           style: TextStyle(
@@ -286,6 +290,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
         ),
         const SizedBox(height: 12),
 
+        // Tile to clear all grades but keep subjects.
         _dangerTile(
           icon: Icons.grade_outlined,
           label: 'Cancella tutti i voti',
@@ -302,6 +307,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
+        // Tile to clear all tasks and tests.
         _dangerTile(
           icon: Icons.assignment_outlined,
           label: 'Cancella agenda',
@@ -316,6 +322,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
+        // Tile to clear the timetable.
         _dangerTile(
           icon: Icons.schedule_outlined,
           label: 'Cancella orario',
@@ -330,6 +337,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
+        // Tile to delete all app data with a stronger warning style.
         _dangerTile(
           icon: Icons.delete_forever_outlined,
           label: 'Cancella tutto',
@@ -355,6 +363,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
+  // Small card widget used in the statistics grid.
   Widget _statCard(String label, String valore, IconData icon, Color colore) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -390,6 +399,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
+  // Tile style for destructive actions, with optional red styling.
   Widget _dangerTile({
     required IconData icon,
     required String label,

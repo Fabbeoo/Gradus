@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/materia.dart';
 
+// Screen that shows details for a single subject and its grades.
 class DettaglioMateriaScreen extends StatefulWidget {
   final Materia materia;
   final VoidCallback onUpdate;
@@ -23,6 +24,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
   @override
   void initState() {
     super.initState();
+    // Create a tab controller for two periods and set initial tab.
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -37,12 +39,14 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
     super.dispose();
   }
 
+  // Return a color for a grade value.
   Color _coloreVoto(double voto) {
     if (voto >= 7) return Colors.green;
     if (voto >= 6) return Colors.orange;
     return Colors.red;
   }
 
+  // Return a color for the average, or grey if no grades.
   Color _coloreMedia(double media, bool hasVoti) {
     if (!hasVoti) return Colors.grey;
     if (media >= 7) return Colors.green;
@@ -50,6 +54,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
     return Colors.red;
   }
 
+  // Show an icon for trend: up, down, or flat.
   Widget _tendenzaWidget(int tendenza) {
     if (tendenza == 1) {
       return const Icon(Icons.arrow_upward, color: Colors.green, size: 18);
@@ -60,6 +65,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
     }
   }
 
+  // Ask user to confirm deleting a grade, then remove it and notify parent.
   void _eliminaVoto(List<Voto> lista, int index) {
     showDialog(
       context: context,
@@ -87,7 +93,9 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
     );
   }
 
+  // Build the main content for a given list of grades in a period.
   Widget _buildContenuto(List<Voto> votiPeriodo) {
+    // If there are no grades, show an empty state message.
     if (votiPeriodo.isEmpty) {
       return const Center(
         child: Column(
@@ -109,6 +117,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
       );
     }
 
+    // Calculate average and trend for the period.
     final media =
         votiPeriodo.map((v) => v.valore).reduce((a, b) => a + b) /
         votiPeriodo.length;
@@ -118,7 +127,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Card media
+        // Card that shows the average and trend.
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -178,7 +187,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
           ),
         ),
 
-        // Voto necessario per sufficienza
+        // If average is below passing, show needed grade information.
         if (media < 6.0) ...[
           const SizedBox(height: 12),
           Builder(
@@ -238,7 +247,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
 
         const SizedBox(height: 20),
 
-        // Grafico
+        // If there are at least two grades, show a line chart of the trend.
         if (votiPeriodo.length >= 2) ...[
           const Text(
             'Andamento',
@@ -312,7 +321,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
                   ),
                 ),
                 lineBarsData: [
-                  // Linea media tratteggiata
+                  // Dashed line showing the average.
                   LineChartBarData(
                     spots: List.generate(
                       votiPeriodo.length,
@@ -324,7 +333,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
                     dotData: const FlDotData(show: false),
                     dashArray: [5, 5],
                   ),
-                  // Linea voti
+                  // Line showing actual grades with colored dots.
                   LineChartBarData(
                     spots: List.generate(
                       votiPeriodo.length,
@@ -356,7 +365,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
           const SizedBox(height: 20),
         ],
 
-        // Lista voti
+        // List of grades with swipe-to-delete.
         const Text(
           'Voti',
           style: TextStyle(
@@ -401,6 +410,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
               ),
               child: Row(
                 children: [
+                  // Box that shows the numeric grade.
                   Container(
                     width: 50,
                     height: 50,
@@ -423,6 +433,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
                     ),
                   ),
                   const SizedBox(width: 14),
+                  // Grade details: type, optional description, and date.
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,6 +478,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
       appBar: AppBar(title: Text(widget.materia.nome), centerTitle: true),
       body: Column(
         children: [
+          // Tabs for first and second period.
           TabBar(
             controller: _tabController,
             tabs: const [
@@ -474,6 +486,7 @@ class _DettaglioMateriaScreenState extends State<DettaglioMateriaScreen>
               Tab(text: '2° Periodo'),
             ],
           ),
+          // Show content for the selected period.
           Expanded(
             child: TabBarView(
               controller: _tabController,

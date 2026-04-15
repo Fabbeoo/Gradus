@@ -4,7 +4,7 @@ import '../models/materia.dart';
 
 class VotiScreen extends StatefulWidget {
   final List<Materia> materie;
-  final VoidCallback onUpdate; // aggiungi questo
+  final VoidCallback onUpdate; // add this
 
   const VotiScreen({super.key, required this.materie, required this.onUpdate});
 
@@ -17,7 +17,7 @@ class _VotiScreenState extends State<VotiScreen>
   late TabController _tabController;
   Materia? _materiaSelezionata;
 
-  // Lista completa dei voti italiani
+  // Full list of Italian grade labels and their numeric values
   final List<Map<String, dynamic>> _votiDisponibili = [
     {'label': '1', 'valore': 1.00},
     {'label': '1+', 'valore': 1.25},
@@ -75,6 +75,7 @@ class _VotiScreenState extends State<VotiScreen>
     super.dispose();
   }
 
+  // Open the add-grade form for the given period (1 or 2)
   void _aggiungiVoto(int periodo) {
     if (widget.materie.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +96,7 @@ class _VotiScreenState extends State<VotiScreen>
 
     String tipoScelto = 'scritto';
 
-    // Indice di default sul voto 6
+    // Default index set to the label '6'
     int votoIndex = _votiDisponibili.indexWhere((v) => v['label'] == '6');
     final FixedExtentScrollController scrollController =
         FixedExtentScrollController(initialItem: votoIndex);
@@ -128,7 +129,7 @@ class _VotiScreenState extends State<VotiScreen>
               ),
               const SizedBox(height: 20),
 
-              // Materia
+              // Subject selector
               DropdownButtonFormField<Materia>(
                 value: materiaScelta,
                 hint: const Text('Seleziona materia'),
@@ -145,7 +146,7 @@ class _VotiScreenState extends State<VotiScreen>
               ),
               const SizedBox(height: 16),
 
-              // Picker voto
+              // Grade picker area
               const Text(
                 'Voto',
                 style: TextStyle(fontSize: 15, color: Colors.white54),
@@ -161,7 +162,7 @@ class _VotiScreenState extends State<VotiScreen>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Indicatore selezione
+                    // Visual selection indicator
                     Container(
                       height: 40,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -203,7 +204,7 @@ class _VotiScreenState extends State<VotiScreen>
               ),
               const SizedBox(height: 16),
 
-              // Tipo
+              // Type selector: written, oral, practical
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'scritto', label: Text('Scritto')),
@@ -216,7 +217,7 @@ class _VotiScreenState extends State<VotiScreen>
               ),
               const SizedBox(height: 12),
 
-              // Data
+              // Date picker constrained to the selected period
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_today),
@@ -244,7 +245,7 @@ class _VotiScreenState extends State<VotiScreen>
               ),
               const SizedBox(height: 12),
 
-              // Descrizione
+              // Optional description field
               TextField(
                 controller: descrizioneController,
                 decoration: InputDecoration(
@@ -296,6 +297,7 @@ class _VotiScreenState extends State<VotiScreen>
     );
   }
 
+  // Confirm and remove a grade from a subject
   void _eliminaVoto(Materia materia, Voto voto) {
     showDialog(
       context: context,
@@ -321,12 +323,14 @@ class _VotiScreenState extends State<VotiScreen>
     );
   }
 
+  // Return a color for a grade value
   Color _coloreVoto(double voto) {
     if (voto >= 7) return Colors.green;
     if (voto >= 6) return Colors.orange;
     return Colors.red;
   }
 
+  // Convert a numeric grade value back to its label string
   String _labelVoto(double valore) {
     final found = _votiDisponibili.firstWhere(
       (v) => (v['valore'] as double) == valore,
@@ -335,6 +339,7 @@ class _VotiScreenState extends State<VotiScreen>
     return found['label'] as String;
   }
 
+  // Build the list of grades for the selected period and optional subject filter
   Widget _buildLista(List<Voto> Function(Materia) getVoti, int periodo) {
     final materieVisibili = _materiaSelezionata != null
         ? [_materiaSelezionata!]

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/compito.dart';
 import '../models/materia.dart';
 
+// Screen that shows the agenda with subjects and tasks.
+// Allows adding, editing, completing, and deleting tasks.
 class AgendaScreen extends StatefulWidget {
   final List<Materia> materie;
   final List<Compito> compiti;
@@ -19,14 +21,18 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
+  // Open the form to add a new task.
   void _aggiungiCompito() {
     _apriForm();
   }
 
+  // Open the form to edit an existing task.
   void _modificaCompito(Compito compito) {
     _apriForm(compito: compito);
   }
 
+  // Show a bottom sheet form to add or edit a task.
+  // The form includes type, subject, description, and date.
   void _apriForm({Compito? compito}) {
     if (widget.materie.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +81,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Tipo
+              // Type selector: choose task, test, or oral exam.
               SegmentedButton<TipoCompito>(
                 segments: const [
                   ButtonSegment(
@@ -100,7 +106,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Materia
+              // Subject dropdown: pick the subject for the task.
               DropdownButtonFormField<String>(
                 value: materiaScelta,
                 decoration: InputDecoration(
@@ -119,7 +125,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Descrizione
+              // Description field: short text about the task.
               TextField(
                 controller: descrizioneController,
                 maxLines: 2,
@@ -132,7 +138,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Data
+              // Date picker: show and change the due date.
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_today),
@@ -163,12 +169,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     if (descrizioneController.text.trim().isEmpty) return;
                     setState(() {
                       if (isModifica) {
-                        // Modifica in-place
+                        // Update the existing task fields directly.
                         compito.materia = materiaScelta!;
                         compito.descrizione = descrizioneController.text.trim();
                         compito.dataConsegna = dataScelta;
                         compito.tipo = tipoScelto;
                       } else {
+                        // Create a new task and add it to the list.
                         widget.compiti.add(
                           Compito(
                             materia: materiaScelta!,
@@ -178,6 +185,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                           ),
                         );
                       }
+                      // Keep tasks sorted by due date.
                       widget.compiti.sort(
                         (a, b) => a.dataConsegna.compareTo(b.dataConsegna),
                       );
@@ -195,11 +203,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
     );
   }
 
+  // Remove a task by index and notify parent.
   void _eliminaCompito(int index) {
     setState(() => widget.compiti.removeAt(index));
     widget.onUpdate();
   }
 
+  // Return a color based on the task type.
   Color _colorePerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -211,6 +221,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     }
   }
 
+  // Return an icon based on the task type.
   IconData _iconaPerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -222,6 +233,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     }
   }
 
+  // Return a short label for the task type.
   String _labelPerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -233,6 +245,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     }
   }
 
+  // Format the date as "Today", "Tomorrow", or day/month/year.
   String _formatData(DateTime data) {
     final oggi = DateTime.now();
     final domani = DateTime.now().add(const Duration(days: 1));
@@ -241,11 +254,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
     return '${data.day}/${data.month}/${data.year}';
   }
 
+  // Check if the date is before today (expired).
   bool _isScaduto(DateTime data) {
     final oggi = DateTime.now();
     return data.isBefore(DateTime(oggi.year, oggi.month, oggi.day));
   }
 
+  // Build the visual card for a single task.
   Widget _buildCard(Compito compito, int index) {
     final colore = _colorePerTipo(compito.tipo);
     final scaduto = _isScaduto(compito.dataConsegna);
@@ -282,7 +297,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
         ),
         child: Row(
           children: [
-            // Checkbox
+            // Tap area to mark task as completed or not.
             GestureDetector(
               onTap: () {
                 setState(() => compito.completato = !compito.completato);
@@ -305,7 +320,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
             ),
             const SizedBox(width: 12),
 
-            // Info
+            // Main info: icon, type label, subject, and description.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +363,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
             ),
 
-            // Data + bottone modifica
+            // Date display and edit button on the right side.
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

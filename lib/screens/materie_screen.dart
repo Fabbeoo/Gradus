@@ -38,6 +38,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     super.dispose();
   }
 
+  // Build points that show the global average over time for the selected period.
   List<FlSpot> _spotsAndamentoGenerale(List<Voto> Function(Materia) getVoti) {
     final tuttiVoti =
         widget.materie
@@ -64,6 +65,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     return spots;
   }
 
+  // Show a bottom sheet with a larger chart for the global average.
   void _mostraGraficoGenerale(
     BuildContext context,
     List<FlSpot> spots,
@@ -209,14 +211,17 @@ class _MaterieScreenState extends State<MaterieScreen>
     );
   }
 
+  // Open the form to add a new subject.
   void _aggiungiMateria(BuildContext context) {
     _apriFormMateria(context);
   }
 
+  // Open the form to edit an existing subject.
   void _modificaMateria(BuildContext context, Materia materia) {
     _apriFormMateria(context, materia: materia);
   }
 
+  // Show a bottom sheet form to add or edit a subject.
   void _apriFormMateria(BuildContext context, {Materia? materia}) {
     final isModifica = materia != null;
     final nomeController = TextEditingController(
@@ -305,6 +310,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     );
   }
 
+  // Ask the user to confirm deleting a subject and remove it if confirmed.
   void _eliminaMateria(BuildContext context, int index) {
     showDialog(
       context: context,
@@ -332,6 +338,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     );
   }
 
+  // Return a color based on an average value.
   Color _coloreMedia(double media, bool hasVoti) {
     if (!hasVoti) return Colors.grey;
     if (media >= 7) return Colors.green;
@@ -339,6 +346,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     return Colors.red;
   }
 
+  // Return an icon for trend direction.
   Widget _tendenzaWidget(int tendenza) {
     if (tendenza == 1) {
       return const Icon(Icons.arrow_upward, color: Colors.green, size: 18);
@@ -348,6 +356,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     return const Icon(Icons.drag_handle, color: Colors.grey, size: 18);
   }
 
+  // Compute the global average for the selected period across subjects.
   double _mediaGeneralePeriodo(List<Voto> Function(Materia) getVoti) {
     final con = widget.materie.where((m) => getVoti(m).isNotEmpty).toList();
     if (con.isEmpty) return 0;
@@ -358,6 +367,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     return medie.reduce((a, b) => a + b) / con.length;
   }
 
+  // Compute the overall trend for the selected period: up, down, or stable.
   int _tendenzaGeneralePeriodo(List<Voto> Function(Materia) getVoti) {
     final con = widget.materie.where((m) => getVoti(m).length >= 2).toList();
     if (con.isEmpty) return 0;
@@ -372,6 +382,7 @@ class _MaterieScreenState extends State<MaterieScreen>
     return 0;
   }
 
+  // Build the UI list for a given period (first or second).
   Widget _buildLista(List<Voto> Function(Materia) getVoti, String periodo) {
     final materie = widget.materie;
     final mediaGen = _mediaGeneralePeriodo(getVoti);
@@ -381,7 +392,7 @@ class _MaterieScreenState extends State<MaterieScreen>
 
     return Column(
       children: [
-        // Card media generale
+        // Card that shows the global average and opens the chart on tap.
         GestureDetector(
           onTap: spots.length >= 2
               ? () => _mostraGraficoGenerale(context, spots, mediaGen)
@@ -433,7 +444,7 @@ class _MaterieScreenState extends State<MaterieScreen>
           ),
         ),
 
-        // Lista materie
+        // List of subjects for the selected period.
         Expanded(
           child: materie.isEmpty
               ? const Center(
@@ -548,7 +559,7 @@ class _MaterieScreenState extends State<MaterieScreen>
                                   ],
                                 ),
                               ),
-                              // Bottone modifica
+                              // Edit button for the subject.
                               IconButton(
                                 onPressed: () =>
                                     _modificaMateria(context, materia),

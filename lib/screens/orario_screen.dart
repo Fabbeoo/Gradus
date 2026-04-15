@@ -85,7 +85,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
     }
   }
 
-  // Raggruppa le ore del giorno in blocchi consecutivi della stessa materia
+  // Group consecutive hours of the same subject into blocks
   List<Map<String, dynamic>> _raggruppaOre(String giorno) {
     final blocchi = <Map<String, dynamic>>[];
     int i = 1;
@@ -111,6 +111,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
     return blocchi;
   }
 
+  // Open the slot editor for a specific day and hour
   void _modificaSlot(String giorno, int ora) {
     if (widget.materie.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,7 +185,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Selettore colore
+              // Color selector for the lesson block
               const Text('Colore:', style: TextStyle(fontSize: 15)),
               const SizedBox(height: 10),
               Wrap(
@@ -227,7 +228,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Ore consecutive
+              // Control to set how many consecutive hours this lesson should span
               Row(
                 children: [
                   const Text(
@@ -265,7 +266,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
-                            // Rimuovi tutte le ore di questo blocco
+                            // Remove all hours that belong to this block
                             final blocchi = _raggruppaOre(giorno);
                             final blocco = blocchi.firstWhere(
                               (b) =>
@@ -341,13 +342,14 @@ class _OrarioScreenState extends State<OrarioScreen> {
     );
   }
 
+  // Build the single-day view with blocks for each hour
   Widget _buildVistaSingola(String giorno) {
     final blocchi = _raggruppaOre(giorno);
     final haLezioni = blocchi.any((b) => b['lezione'] != null);
 
     return Column(
       children: [
-        // Header giorno con frecce
+        // Day header with left and right arrows
         Container(
           margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -397,7 +399,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
           ),
         ),
 
-        // Lista blocchi ore
+        // List of hour blocks for the day
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -429,7 +431,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
                   ),
                   child: Row(
                     children: [
-                      // Colonna numeri ora
+                      // Column that shows the hour numbers for the block
                       SizedBox(
                         width: 30,
                         child: Column(
@@ -501,7 +503,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
           ),
         ),
 
-        // Bottone orario completo
+        // Button to switch to the full timetable view
         Padding(
           padding: const EdgeInsets.all(16),
           child: SizedBox(
@@ -517,6 +519,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
     );
   }
 
+  // Build the full timetable view showing all days and hours in a grid
   Widget _buildVistaCompleta() {
     return Column(
       children: [

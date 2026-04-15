@@ -4,15 +4,17 @@ import 'package:printing/printing.dart';
 import '../models/materia.dart';
 import '../models/lezione.dart';
 
+/// Singleton service responsible for generating and exporting PDF documents.
+/// Supports exporting grades (A4 portrait) and the weekly timetable (A4 landscape).
 class PdfService {
   static final PdfService _instance = PdfService._();
   factory PdfService() => _instance;
   PdfService._();
 
-  // Esporta i voti come PDF
+  /// Generates an A4 PDF containing all grades for the current semester,
+  /// grouped by subject with averages and a color-coded overall average header.
   Future<void> esportaVoti(List<Materia> materie, String nomeStudente) async {
     final pdf = pw.Document();
-
     final periodoCorrente = Materia.periodoCorrente();
     final nomePeriodo = periodoCorrente == 0 ? '1° Periodo' : '2° Periodo';
 
@@ -21,42 +23,10 @@ class PdfService {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (context) => [
-          // Header
-          pw.Container(
-            padding: const pw.EdgeInsets.all(16),
-            decoration: pw.BoxDecoration(
-              color: PdfColors.blue800,
-              borderRadius: pw.BorderRadius.circular(8),
-            ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'Registro Voti — $nomeStudente',
-                  style: pw.TextStyle(
-                    fontSize: 22,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.white,
-                  ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  '$nomePeriodo — ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                  style: const pw.TextStyle(
-                    fontSize: 12,
-                    color: PdfColors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildPdfHeader('Registro Voti — $nomeStudente', nomePeriodo),
           pw.SizedBox(height: 24),
-
-          // Media generale
           _buildMediaGeneralePdf(materie, periodoCorrente),
           pw.SizedBox(height: 24),
-
-          // Tabella per ogni materia
           ...materie.map((materia) {
             final voti = periodoCorrente == 0
                 ? materia.primoperiodo
@@ -82,6 +52,37 @@ class PdfService {
     );
   }
 
+  /// Builds the blue header banner used in both PDF exports.
+  pw.Widget _buildPdfHeader(String titolo, String sottotitolo) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.blue800,
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            titolo,
+            style: pw.TextStyle(
+              fontSize: 22,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            '$sottotitolo — ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+            style: const pw.TextStyle(fontSize: 12, color: PdfColors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the overall average summary card for the PDF.
+  /// Returns an empty widget if no grades are available.
   pw.Widget _buildMediaGeneralePdf(List<Materia> materie, int periodoCorrente) {
     final materieConVoti = materie.where((m) {
       final voti = periodoCorrente == 0 ? m.primoperiodo : m.secondoperiodo;
@@ -133,9 +134,11 @@ class PdfService {
     );
   }
 
+  /// Builds the subject header row showing subject name, teacher, and average.
   pw.Widget _buildHeaderMateria(Materia materia, List<Voto> voti) {
     final media =
         voti.map((v) => v.valore).reduce((a, b) => a + b) / voti.length;
+
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: pw.BoxDecoration(
@@ -188,6 +191,7 @@ class PdfService {
     );
   }
 
+  /// Builds the grades table with columns: grade, date, type, description.
   pw.Widget _buildTabellaVoti(List<Voto> voti) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -198,7 +202,6 @@ class PdfService {
         3: const pw.FlexColumnWidth(3),
       },
       children: [
-        // Header tabella
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.grey200),
           children: [
@@ -208,7 +211,6 @@ class PdfService {
             _cellaTabellaHeader('Descrizione'),
           ],
         ),
-        // Righe voti
         ...voti.map(
           (voto) => pw.TableRow(
             children: [
@@ -233,6 +235,7 @@ class PdfService {
     );
   }
 
+  /// Builds a bold header cell for the grades table.
   pw.Widget _cellaTabellaHeader(String testo) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8),
@@ -243,6 +246,7 @@ class PdfService {
     );
   }
 
+  /// Builds a regular data cell, optionally colored and bolded.
   pw.Widget _cellaTabella(String testo, {PdfColor? colore, bool bold = false}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8),
@@ -257,11 +261,12 @@ class PdfService {
     );
   }
 
-  // Esporta l'orario come PDF
+  /// Generates an A4 landscape PDF of the weekly timetable,
+  /// with days as columns and lesson slots as rows.
   Future<void> esportaOrario(List<Lezione> lezioni, String nomeStudente) async {
     final pdf = pw.Document();
     final giorni = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-    final orePerGiorno = 8;
+    const orePerGiorno = 8;
 
     pdf.addPage(
       pw.Page(
@@ -270,37 +275,8 @@ class PdfService {
         build: (context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            // Header
-            pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.blue800,
-                borderRadius: pw.BorderRadius.circular(8),
-              ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Orario Scolastico — $nomeStudente',
-                    style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                  pw.Text(
-                    '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                    style: const pw.TextStyle(
-                      fontSize: 12,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildPdfHeader('Orario Scolastico — $nomeStudente', ''),
             pw.SizedBox(height: 16),
-
-            // Tabella orario
             pw.Expanded(
               child: pw.Table(
                 border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -310,7 +286,6 @@ class PdfService {
                     i: const pw.FlexColumnWidth(1),
                 },
                 children: [
-                  // Header giorni
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(
                       color: PdfColors.blue800,
@@ -339,7 +314,6 @@ class PdfService {
                       ),
                     ],
                   ),
-                  // Righe ore
                   ...List.generate(orePerGiorno, (oraIndex) {
                     final ora = oraIndex + 1;
                     return pw.TableRow(
@@ -347,7 +321,6 @@ class PdfService {
                           ? const pw.BoxDecoration(color: PdfColors.grey50)
                           : null,
                       children: [
-                        // Numero ora
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(6),
                           child: pw.Text(
@@ -360,7 +333,6 @@ class PdfService {
                             ),
                           ),
                         ),
-                        // Celle materie
                         ...giorni.map((giorno) {
                           final lezione = lezioni.firstWhere(
                             (l) => l.giorno == giorno && l.ora == ora,
@@ -405,6 +377,7 @@ class PdfService {
     );
   }
 
+  /// Converts a numeric grade value to its Italian label (e.g. 6.25 → '6+').
   String _labelVoto(double valore) {
     final votiMap = {
       1.00: '1',

@@ -15,6 +15,7 @@ class HomeScreen extends StatelessWidget {
     required this.compiti,
   });
 
+  // Return a color based on the average value and whether there are grades.
   Color _coloreMedia(double media, bool hasVoti) {
     if (!hasVoti) return Colors.grey;
     if (media >= 7) return Colors.green;
@@ -22,6 +23,7 @@ class HomeScreen extends StatelessWidget {
     return Colors.red;
   }
 
+  // Return an icon that shows if trend is up, down, or flat.
   Widget _tendenzaWidget(int tendenza) {
     if (tendenza == 1) {
       return const Icon(Icons.arrow_upward, color: Colors.green, size: 18);
@@ -31,12 +33,14 @@ class HomeScreen extends StatelessWidget {
     return const Icon(Icons.drag_handle, color: Colors.grey, size: 18);
   }
 
+  // Compute the overall average across subjects that have grades.
   double _mediaGenerale(List<Materia> materie) {
     final con = materie.where((m) => m.voti.isNotEmpty).toList();
     if (con.isEmpty) return 0;
     return con.map((m) => m.media).reduce((a, b) => a + b) / con.length;
   }
 
+  // Compute a simple overall trend: 1 up, -1 down, 0 stable.
   int _tendenzaGenerale(List<Materia> materie) {
     final con = materie.where((m) => m.voti.length >= 2).toList();
     if (con.isEmpty) return 0;
@@ -50,10 +54,10 @@ class HomeScreen extends StatelessWidget {
     return 0;
   }
 
-  // Calcola la media generale nel tempo — ogni volta che viene aggiunto
-  // un voto (in ordine cronologico) ricalcola la media di tutte le materie
+  // Build points that show how the global average changes over time.
+  // For each new grade (chronological), recalculate the average across subjects.
   List<FlSpot> _spotsAndamentoGenerale(List<Materia> materie) {
-    // Raccogli tutti i voti con la loro materia, ordinati per data
+    // Collect all grades with their subject, sorted by date.
     final tuttiVoti =
         materie.expand((m) => m.voti.map((v) => (materia: m, voto: v))).toList()
           ..sort((a, b) => a.voto.data.compareTo(b.voto.data));
@@ -61,16 +65,16 @@ class HomeScreen extends StatelessWidget {
     if (tuttiVoti.length < 2) return [];
 
     final spots = <FlSpot>[];
-    // Per ogni voto aggiunto, ricalcola la media generale
+    // For each added grade, recalculate the global average.
     for (int i = 0; i < tuttiVoti.length; i++) {
       final votiFinoAdOra = tuttiVoti.sublist(0, i + 1);
-      // Raggruppa per materia
+      // Group grades by subject.
       final perMateria = <Materia, List<double>>{};
       for (final item in votiFinoAdOra) {
         perMateria.putIfAbsent(item.materia, () => []);
         perMateria[item.materia]!.add(item.voto.valore);
       }
-      // Media delle medie
+      // Compute the average of subject averages.
       final medie = perMateria.values
           .map((v) => v.reduce((a, b) => a + b) / v.length)
           .toList();
@@ -80,12 +84,14 @@ class HomeScreen extends StatelessWidget {
     return spots;
   }
 
+  // Return the most recent n grades across all subjects.
   List<Voto> _ultimiVoti(List<Materia> materie, {int n = 5}) {
     final tutti = materie.expand((m) => m.voti).toList()
       ..sort((a, b) => b.data.compareTo(a.data));
     return tutti.take(n).toList();
   }
 
+  // Find the subject name that contains the given grade.
   String _nomeMateriaDiVoto(Voto voto, List<Materia> materie) {
     for (final m in materie) {
       if (m.voti.contains(voto)) return m.nome;
@@ -93,12 +99,14 @@ class HomeScreen extends StatelessWidget {
     return '';
   }
 
+  // Return a color for a single grade value.
   Color _coloreVoto(double v) {
     if (v >= 7) return Colors.green;
     if (v >= 6) return Colors.orange;
     return Colors.red;
   }
 
+  // Return tasks due within the next 7 days and not completed.
   List<Compito> _compitiSettimana(List<Compito> compiti) {
     final oggi = DateTime.now();
     final fineSettimana = oggi.add(const Duration(days: 7));
@@ -113,6 +121,7 @@ class HomeScreen extends StatelessWidget {
       ..sort((a, b) => a.dataConsegna.compareTo(b.dataConsegna));
   }
 
+  // Return tests and oral exams due within the next 7 days and not completed.
   List<Compito> _verificheSettimana(List<Compito> compiti) {
     final oggi = DateTime.now();
     final fineSettimana = oggi.add(const Duration(days: 7));
@@ -129,6 +138,7 @@ class HomeScreen extends StatelessWidget {
       ..sort((a, b) => a.dataConsegna.compareTo(b.dataConsegna));
   }
 
+  // Return subjects that currently have an average below 6 in the active period.
   List<Materia> _materieDaRecuperare(List<Materia> materie) {
     final periodo = Materia.periodoCorrente();
     return materie.where((m) {
@@ -138,6 +148,7 @@ class HomeScreen extends StatelessWidget {
     }).toList();
   }
 
+  // Format a date as "Today", "Tomorrow", or day/month.
   String _formatData(DateTime data) {
     final oggi = DateTime.now();
     final domani = oggi.add(const Duration(days: 1));
@@ -146,6 +157,7 @@ class HomeScreen extends StatelessWidget {
     return '${data.day}/${data.month}';
   }
 
+  // Return a readable label for a task type.
   String _labelTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.verifica:
@@ -157,6 +169,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  // Return a color associated with a task type.
   Color _coloreTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.verifica:
@@ -185,7 +198,7 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Saluto
+          // Greeting header with student name and current period.
           Text(
             'Ciao, $nomeStudente! 👋',
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
@@ -196,7 +209,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Card media + grafico unificata
+          // Card that shows overall average and a small trend chart.
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -211,7 +224,7 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Riga media + tendenza
+                // Row with the numeric average and trend indicator.
                 Row(
                   children: [
                     Expanded(
@@ -257,7 +270,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
 
-                // Grafico andamento
+                // Small line chart showing the trend over time if available.
                 if (spots.length >= 2) ...[
                   const SizedBox(height: 20),
                   SizedBox(
@@ -302,7 +315,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         lineBarsData: [
-                          // Linea sufficienza tratteggiata
+                          // Dashed line at the passing threshold (6).
                           LineChartBarData(
                             spots: [
                               FlSpot(0, 6),
@@ -314,7 +327,7 @@ class HomeScreen extends StatelessWidget {
                             dotData: const FlDotData(show: false),
                             dashArray: [5, 5],
                           ),
-                          // Linea andamento media
+                          // Line showing the global average trend.
                           LineChartBarData(
                             spots: spots,
                             isCurved: true,
@@ -353,7 +366,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Materie da recuperare
+          // Section for subjects that need improvement.
           if (daRecuperare.isNotEmpty) ...[
             _sectionTitle('⚠️ Da recuperare'),
             const SizedBox(height: 8),
@@ -410,7 +423,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Ultimi voti
+          // Section showing the most recent grades.
           if (ultimiVoti.isNotEmpty) ...[
             _sectionTitle('Ultimi voti'),
             const SizedBox(height: 8),
@@ -477,7 +490,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Verifiche e interrogazioni
+          // Section for tests and oral exams this week.
           if (verificheSett.isNotEmpty) ...[
             _sectionTitle('Verifiche e interrogazioni questa settimana'),
             const SizedBox(height: 8),
@@ -545,7 +558,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Compiti settimana
+          // Section for regular homework this week.
           if (compitiSett
               .where((c) => c.tipo == TipoCompito.compito)
               .isNotEmpty) ...[
@@ -612,7 +625,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // Tutto ok
+          // If there is nothing to show, display a friendly empty state.
           if (!hasVoti &&
               compitiSett.isEmpty &&
               verificheSett.isEmpty &&
@@ -644,6 +657,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // Small helper to render section titles with consistent style.
   Widget _sectionTitle(String title) {
     return Text(
       title,
