@@ -17,4 +17,9 @@ import flutter_local_notifications
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
+  override func applicationWillTerminate(_ application: UIApplication) {
+    // Clean up Flutter engine on termination to avoid double invocation on iOS 26
+    super.applicationWillTerminate(application)
+  }
 }
