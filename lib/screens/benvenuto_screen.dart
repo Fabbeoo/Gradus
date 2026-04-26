@@ -16,38 +16,45 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
 
   final List<Map<String, dynamic>> _pagine = [
     {
-      'icon': Icons.school,
+      'icon': Icons.waving_hand,
       'color': Colors.blue,
-      'titolo': 'Benvenuto nel tuo Registro!',
+      'titolo': 'Benvenuto in Gradus!',
       'descrizione':
-          'Tieni traccia dei tuoi voti, del tuo orario scolastico e dei tuoi compiti in un unico posto.',
+          'Il tuo registro scolastico personale. Tieni traccia di voti, orario e compiti — tutto in un posto.',
     },
     {
       'icon': Icons.grade,
       'color': Colors.green,
       'titolo': 'Voti e Medie',
       'descrizione':
-          'Inserisci i tuoi voti per materia e periodo. Il registro calcola automaticamente le medie e ti mostra l\'andamento nel tempo con un grafico.',
+          'Inserisci i tuoi voti manualmente oppure importali automaticamente da ClasseViva. Gradus calcola le medie e mostra il tuo andamento nel tempo.',
     },
     {
       'icon': Icons.schedule,
       'color': Colors.purple,
       'titolo': 'Orario Scolastico',
       'descrizione':
-          'Configura il tuo orario settimanale. Ogni giorno vedrai le tue lezioni in modo chiaro, con i blocchi di ore consecutive uniti automaticamente.',
+          'Configura il tuo orario settimanale o importalo da ClasseViva. Ogni giorno vedrai le lezioni del giorno con blocchi consecutivi uniti automaticamente.',
     },
     {
       'icon': Icons.assignment,
       'color': Colors.orange,
       'titolo': 'Agenda',
       'descrizione':
-          'Aggiungi compiti, verifiche e interrogazioni. Riceverai una notifica il giorno prima e il giorno stesso per non dimenticare nulla.',
+          'Compiti, verifiche e interrogazioni vengono importati da ClasseViva ma puoi aggiungerne di manuali. Ricevi notifiche il giorno prima e il giorno stesso.',
+    },
+    {
+      'icon': Icons.sync,
+      'color': Colors.teal,
+      'titolo': 'ClasseViva',
+      'descrizione':
+          'Accedi con le tue credenziali ClasseViva nella sezione Profilo per sincronizzare tutto automaticamente. Puoi anche usare Gradus senza ClasseViva inserendo tutto a mano.',
     },
     {
       'icon': Icons.person,
       'color': Colors.pink,
       'titolo': 'Come ti chiami?',
-      'descrizione': 'Inserisci il tuo nome per personalizzare il registro.',
+      'descrizione': 'Inserisci il tuo nome per personalizzare Gradus.',
     },
   ];
 
@@ -86,7 +93,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Page indicators shown at the top to show current page.
+            // Page indicators
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Row(
@@ -109,7 +116,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
               ),
             ),
 
-            // Pages displayed in a PageView for the welcome flow.
+            // Pages
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -126,7 +133,6 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Icon shown inside a circular background.
                         Container(
                           width: 120,
                           height: 120,
@@ -145,8 +151,6 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                           ),
                         ),
                         const SizedBox(height: 40),
-
-                        // Title text for the page.
                         Text(
                           pagina['titolo'] as String,
                           textAlign: TextAlign.center,
@@ -156,8 +160,6 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Description text explaining the feature.
                         Text(
                           pagina['descrizione'] as String,
                           textAlign: TextAlign.center,
@@ -167,8 +169,6 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                             height: 1.5,
                           ),
                         ),
-
-                        // Name input field shown only on the last page.
                         if (isUltima) ...[
                           const SizedBox(height: 40),
                           TextField(
@@ -197,12 +197,11 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
               ),
             ),
 
-            // Navigation buttons at the bottom: back and next/start.
+            // Navigation buttons
             Padding(
               padding: const EdgeInsets.all(32),
               child: Row(
                 children: [
-                  // Back button shown when not on the first page.
                   if (_paginaCorrente > 0)
                     Expanded(
                       child: OutlinedButton(
@@ -216,15 +215,13 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                       ),
                     ),
                   if (_paginaCorrente > 0) const SizedBox(width: 12),
-
-                  // Next or Start button that advances pages or completes the flow.
                   Expanded(
                     flex: 2,
                     child: FilledButton(
                       onPressed: _avanti,
                       child: Text(
                         _paginaCorrente == _pagine.length - 1
-                            ? 'Inizia! '
+                            ? 'Inizia!'
                             : 'Avanti',
                         style: const TextStyle(fontSize: 16),
                       ),

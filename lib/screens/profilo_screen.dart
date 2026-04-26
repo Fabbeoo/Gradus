@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/materia.dart';
 import '../models/lezione.dart';
 import '../models/compito.dart';
-import '../services/pdf_service.dart';
+import '../api/services/classeviva_service.dart';
+import 'classeviva_login_screen.dart';
+import 'sincronizzazione_screen.dart';
 
 class ProfiloScreen extends StatefulWidget {
   final String nomeStudente;
@@ -29,7 +31,24 @@ class ProfiloScreen extends StatefulWidget {
 }
 
 class _ProfiloScreenState extends State<ProfiloScreen> {
-  // Open a bottom sheet to edit the student's name.
+  bool _cvLoggedIn = false;
+  String? _cvNome;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkClasseViva();
+  }
+
+  Future<void> _checkClasseViva() async {
+    final loggedIn = await ClasseVivaService().isLoggedIn();
+    final nome = await ClasseVivaService().getNomeStudente();
+    setState(() {
+      _cvLoggedIn = loggedIn;
+      _cvNome = nome;
+    });
+  }
+
   void _modificaNome() {
     final controller = TextEditingController(text: widget.nomeStudente);
     showModalBottomSheet(
@@ -85,7 +104,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
-  // Small reusable tile used for exporting data.
   Widget _exportTile({
     required IconData icon,
     required String label,
@@ -132,7 +150,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
-  // Show a confirmation dialog before deleting data.
   void _cancellaDati({
     required String titolo,
     required String messaggio,
@@ -163,7 +180,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Compute simple statistics for display.
     final totVoti = widget.materie.fold<int>(
       0,
       (sum, m) => sum + m.voti.length,
@@ -175,7 +191,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Avatar and name section with edit button.
+        // Avatar and name
         Center(
           child: Column(
             children: [
@@ -213,7 +229,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
         const SizedBox(height: 24),
 
-        // Statistics grid showing counts for subjects, grades, tasks, and lessons.
+        // Statistics
         const Text(
           'Statistiche',
           style: TextStyle(
@@ -250,9 +266,9 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
 
         const SizedBox(height: 28),
 
-        // Export section with tiles to generate PDFs.
+        // ClasseViva section
         const Text(
-          'Esportazione',
+          'ClasseViva',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -261,25 +277,106 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
         ),
         const SizedBox(height: 12),
 
-        _exportTile(
-          icon: Icons.picture_as_pdf,
-          label: 'Esporta Voti',
-          sublabel: 'Genera un PDF con tutti i tuoi voti',
-          colore: Colors.blue,
-          onTap: () =>
-              PdfService().esportaVoti(widget.materie, widget.nomeStudente),
-        ),
-        const SizedBox(height: 8),
-        _exportTile(
-          icon: Icons.calendar_month,
-          label: 'Esporta Orario',
-          sublabel: 'Genera un PDF con il tuo orario settimanale',
-          colore: Colors.purple,
-          onTap: () =>
-              PdfService().esportaOrario(widget.lezioni, widget.nomeStudente),
-        ),
+        _cvLoggedIn
+            ? Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Connesso a ClasseViva',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              if (_cvNome != null)
+                                Text(
+                                  _cvNome!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white54,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _exportTile(
+                    icon: Icons.sync,
+                    label: 'Sincronizza ora',
+                    sublabel: 'Importa voti, orario e agenda da ClasseViva',
+                    colore: Colors.blue,
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SincronizzazioneScreen(
+                            materie: widget.materie,
+                            lezioni: widget.lezioni,
+                            compiti: widget.compiti,
+                            onUpdate: widget.onUpdate,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _exportTile(
+                    icon: Icons.logout,
+                    label: 'Disconnetti ClasseViva',
+                    sublabel: 'Rimuovi le credenziali salvate',
+                    colore: Colors.red,
+                    onTap: () async {
+                      await ClasseVivaService().logout();
+                      _checkClasseViva();
+                    },
+                  ),
+                ],
+              )
+            : _exportTile(
+                icon: Icons.login,
+                label: 'Accedi a ClasseViva',
+                sublabel: 'Importa voti, orario e agenda automaticamente',
+                colore: Colors.blue,
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ClasseVivaLoginScreen(
+                        onLoginSuccess: () {
+                          Navigator.pop(context);
+                          _checkClasseViva();
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
 
-        // Data management section with destructive actions.
+        const SizedBox(height: 28),
+
+        // Data management
         const Text(
           'Gestione dati',
           style: TextStyle(
@@ -290,7 +387,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Tile to clear all grades but keep subjects.
         _dangerTile(
           icon: Icons.grade_outlined,
           label: 'Cancella tutti i voti',
@@ -307,7 +403,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        // Tile to clear all tasks and tests.
         _dangerTile(
           icon: Icons.assignment_outlined,
           label: 'Cancella agenda',
@@ -322,7 +417,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        // Tile to clear the timetable.
         _dangerTile(
           icon: Icons.schedule_outlined,
           label: 'Cancella orario',
@@ -337,7 +431,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        // Tile to delete all app data with a stronger warning style.
         _dangerTile(
           icon: Icons.delete_forever_outlined,
           label: 'Cancella tutto',
@@ -354,7 +447,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
         const SizedBox(height: 32),
         const Center(
           child: Text(
-            'Registro Scolastico v1.0',
+            'Gradus v1.0',
             style: TextStyle(fontSize: 12, color: Colors.white24),
           ),
         ),
@@ -363,7 +456,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
-  // Small card widget used in the statistics grid.
   Widget _statCard(String label, String valore, IconData icon, Color colore) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -399,7 +491,6 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
     );
   }
 
-  // Tile style for destructive actions, with optional red styling.
   Widget _dangerTile({
     required IconData icon,
     required String label,

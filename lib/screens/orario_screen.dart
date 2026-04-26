@@ -347,175 +347,186 @@ class _OrarioScreenState extends State<OrarioScreen> {
     final blocchi = _raggruppaOre(giorno);
     final haLezioni = blocchi.any((b) => b['lezione'] != null);
 
-    return Column(
-      children: [
-        // Day header with left and right arrows
-        Container(
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                onPressed: () {
-                  final index = _giorni.indexOf(giorno);
-                  if (index > 0) {
-                    setState(() => _giornoVisualizzato = _giorni[index - 1]);
-                  }
-                },
-                icon: const Icon(Icons.chevron_left),
-              ),
-              Column(
-                children: [
-                  Text(
-                    _nomeGiornoCompleto(giorno),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+    return GestureDetector(
+      // Swipe left = next day, swipe right = previous day
+      onHorizontalDragEnd: (details) {
+        final index = _giorni.indexOf(giorno);
+        if (details.primaryVelocity == null) return;
+        if (details.primaryVelocity! < -200 && index < _giorni.length - 1) {
+          setState(() => _giornoVisualizzato = _giorni[index + 1]);
+        } else if (details.primaryVelocity! > 200 && index > 0) {
+          setState(() => _giornoVisualizzato = _giorni[index - 1]);
+        }
+      },
+      child: Column(
+        children: [
+          // Header giorno con frecce
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    final index = _giorni.indexOf(giorno);
+                    if (index > 0) {
+                      setState(() => _giornoVisualizzato = _giorni[index - 1]);
+                    }
+                  },
+                  icon: const Icon(Icons.chevron_left),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      _nomeGiornoCompleto(giorno),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  if (!haLezioni)
-                    const Text(
-                      'Nessuna lezione',
-                      style: TextStyle(fontSize: 13, color: Colors.white38),
-                    ),
-                ],
-              ),
-              IconButton(
-                onPressed: () {
-                  final index = _giorni.indexOf(giorno);
-                  if (index < _giorni.length - 1) {
-                    setState(() => _giornoVisualizzato = _giorni[index + 1]);
-                  }
-                },
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
+                    if (!haLezioni)
+                      const Text(
+                        'Nessuna lezione',
+                        style: TextStyle(fontSize: 13, color: Colors.white38),
+                      ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () {
+                    final index = _giorni.indexOf(giorno);
+                    if (index < _giorni.length - 1) {
+                      setState(() => _giornoVisualizzato = _giorni[index + 1]);
+                    }
+                  },
+                  icon: const Icon(Icons.chevron_right),
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // List of hour blocks for the day
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: blocchi.length,
-            itemBuilder: (context, i) {
-              final blocco = blocchi[i];
-              final ora = blocco['ora'] as int;
-              final durata = blocco['durata'] as int;
-              final lezione = blocco['lezione'] as Lezione?;
-              final colore = lezione?.colore ?? Colors.white;
-              final altezza = _altezzaOra * durata + (durata - 1) * 8;
+          // Lista blocchi ore
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: blocchi.length,
+              itemBuilder: (context, i) {
+                final blocco = blocchi[i];
+                final ora = blocco['ora'] as int;
+                final durata = blocco['durata'] as int;
+                final lezione = blocco['lezione'] as Lezione?;
+                final colore = lezione?.colore ?? Colors.white;
+                final altezza = _altezzaOra * durata + (durata - 1) * 8;
 
-              return GestureDetector(
-                onTap: () => _modificaSlot(giorno, ora),
-                child: Container(
-                  height: altezza,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: lezione != null
-                        ? colore.withOpacity(0.15)
-                        : Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
+                return GestureDetector(
+                  onTap: () => _modificaSlot(giorno, ora),
+                  child: Container(
+                    height: altezza,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
                       color: lezione != null
-                          ? colore.withOpacity(0.4)
-                          : Colors.white.withOpacity(0.08),
+                          ? colore.withOpacity(0.15)
+                          : Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: lezione != null
+                            ? colore.withOpacity(0.4)
+                            : Colors.white.withOpacity(0.08),
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      // Column that shows the hour numbers for the block
-                      SizedBox(
-                        width: 30,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: List.generate(
-                            durata,
-                            (j) => Text(
-                              '${ora + j}°',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.white38,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(
+                              durata,
+                              (j) => Text(
+                                '${ora + j}°',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white38,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: lezione != null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lezione.materia,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: colore,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: lezione != null
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      lezione.materia,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: colore,
+                                      ),
                                     ),
+                                    if (lezione.aula != null)
+                                      Text(
+                                        'Aula ${lezione.aula}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: colore.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    if (durata > 1)
+                                      Text(
+                                        '$durata ore',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: colore.withOpacity(0.5),
+                                        ),
+                                      ),
+                                  ],
+                                )
+                              : const Text(
+                                  'Tocca per aggiungere',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white24,
                                   ),
-                                  if (lezione.aula != null)
-                                    Text(
-                                      'Aula ${lezione.aula}',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: colore.withOpacity(0.7),
-                                      ),
-                                    ),
-                                  if (durata > 1)
-                                    Text(
-                                      '$durata ore',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: colore.withOpacity(0.5),
-                                      ),
-                                    ),
-                                ],
-                              )
-                            : const Text(
-                                'Tocca per aggiungere',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white24,
                                 ),
-                              ),
-                      ),
-                      if (lezione != null)
-                        Icon(
-                          Icons.edit_outlined,
-                          size: 16,
-                          color: colore.withOpacity(0.5),
                         ),
-                    ],
+                        if (lezione != null)
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 16,
+                            color: colore.withOpacity(0.5),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-
-        // Button to switch to the full timetable view
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => setState(() => _mostraCompleto = true),
-              icon: const Icon(Icons.calendar_view_week),
-              label: const Text('Visualizza orario completo'),
+                );
+              },
             ),
           ),
-        ),
-      ],
+
+          // Button to switch to full weekly view
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => setState(() => _mostraCompleto = true),
+                icon: const Icon(Icons.calendar_view_week),
+                label: const Text('Visualizza orario completo'),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
