@@ -21,14 +21,15 @@ class CompitoAdapter extends TypeAdapter<Compito> {
       descrizione: fields[1] as String,
       dataConsegna: fields[2] as DateTime,
       tipo: fields[3] as TipoCompito,
-      completato: fields[4] as bool,
+      completato: fields[4] as bool? ?? false,
+      importato: fields[5] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, Compito obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.materia)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class CompitoAdapter extends TypeAdapter<Compito> {
       ..writeByte(3)
       ..write(obj.tipo)
       ..writeByte(4)
-      ..write(obj.completato);
+      ..write(obj.completato)
+      ..writeByte(5)
+      ..write(obj.importato);
   }
 
   @override

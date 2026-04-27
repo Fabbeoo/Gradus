@@ -109,6 +109,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               // Subject dropdown: pick the subject for the task.
               DropdownButtonFormField<String>(
                 value: materiaScelta,
+                isExpanded: true, // aggiunge questa riga
                 decoration: InputDecoration(
                   labelText: 'Materia',
                   border: OutlineInputBorder(
@@ -117,8 +118,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 ),
                 items: widget.materie
                     .map(
-                      (m) =>
-                          DropdownMenuItem(value: m.nome, child: Text(m.nome)),
+                      (m) => DropdownMenuItem(
+                        value: m.nome,
+                        child: Text(m.nome, overflow: TextOverflow.ellipsis),
+                      ),
                     )
                     .toList(),
                 onChanged: (val) => setModalState(() => materiaScelta = val),
@@ -296,8 +299,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Tap area to mark task as completed or not.
+            // Checkbox
             GestureDetector(
               onTap: () {
                 setState(() => compito.completato = !compito.completato);
@@ -320,7 +324,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
             ),
             const SizedBox(width: 12),
 
-            // Main info: icon, type label, subject, and description.
+            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,11 +342,15 @@ class _AgendaScreenState extends State<AgendaScreen> {
                         style: TextStyle(fontSize: 12, color: colore),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        compito.materia,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white54,
+                      Flexible(
+                        child: Text(
+                          compito.materia,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white54,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -358,14 +366,19 @@ class _AgendaScreenState extends State<AgendaScreen> {
                           : null,
                       color: compito.completato ? Colors.white38 : Colors.white,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
 
-            // Date display and edit button on the right side.
+            const SizedBox(width: 8),
+
+            // Data + edit
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   _formatData(compito.dataConsegna),
@@ -399,7 +412,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final compitiAttivi = widget.compiti.where((c) => !c.completato).toList();
+    final ora = DateTime.now();
+    final oggi = DateTime(ora.year, ora.month, ora.day);
+
+    final compitiAttivi = widget.compiti
+        .where((c) => !c.completato && !c.dataConsegna.isBefore(oggi))
+        .toList();
+
     final compitiCompletati = widget.compiti
         .where((c) => c.completato)
         .toList();

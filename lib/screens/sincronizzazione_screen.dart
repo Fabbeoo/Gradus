@@ -77,7 +77,6 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
       final service = ClasseVivaService();
 
       // === STEP 1: Import grades ===
-      // === STEP 1: Import grades ===
       try {
         final votiRemoti = await service.fetchVoti();
 
@@ -126,43 +125,24 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
         debugPrint('Errore import voti: $e');
       }
 
-      // === STEP 2: Import timetable ===
-      try {
-        final lezioniRemote = await service.fetchOrario();
-        widget.lezioni.clear();
-        for (final lr in lezioniRemote) {
-          final giorno = _giorniMap[lr.dayOfWeek];
-          if (giorno == null) continue;
-          if (lr.subjectDesc.trim().isEmpty) continue;
-          widget.lezioni.add(
-            Lezione(
-              giorno: giorno,
-              ora: lr.slotNumber,
-              materia: lr.subjectDesc.trim(),
-            ),
-          );
-          _lezioniImportate++;
-        }
-      } catch (e) {
-        debugPrint('Errore import orario: $e');
-      }
-
-      // === STEP 3: Import agenda ===
+      // === STEP 2: Import agenda ===
       try {
         final now = DateTime.now();
         final agendaRemota = await service.fetchAgenda(
           from: now.subtract(const Duration(days: 30)),
           to: now.add(const Duration(days: 60)),
         );
-        final materieNomi = widget.materie
-            .map((m) => m.nome.toLowerCase())
-            .toSet();
-        widget.compiti.removeWhere(
-          (c) => materieNomi.contains(c.materia.toLowerCase()) && !c.completato,
-        );
+
+        // Remove ALL previously imported agenda items (identified by a flag)
+        // then re-add fresh ones — prevents duplicates on re-sync
+        widget.compiti.removeWhere((c) => c.importato);
+
         for (final ar in agendaRemota) {
+          // Skip past events
+          if (ar.end.isBefore(DateTime(now.year, now.month, now.day))) continue;
           if (ar.notes.trim().isEmpty && ar.subjectDesc.trim().isEmpty)
             continue;
+
           widget.compiti.add(
             Compito(
               materia: ar.subjectDesc.trim().isNotEmpty
@@ -173,10 +153,12 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
                   : ar.evtCode,
               dataConsegna: ar.end,
               tipo: _mapTipoCompito(ar.evtCode),
+              importato: true,
             ),
           );
           _compitiImportati++;
         }
+
         widget.compiti.sort((a, b) => a.dataConsegna.compareTo(b.dataConsegna));
       } catch (e) {
         debugPrint('Errore import agenda: $e');

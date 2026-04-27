@@ -11,6 +11,9 @@ import 'screens/agenda_screen.dart';
 import 'screens/profilo_screen.dart';
 import 'screens/benvenuto_screen.dart';
 import 'services/notification_service.dart';
+import 'api/services/classeviva_service.dart';
+import 'api/models/voto_remoto_model.dart';
+import 'api/models/agenda_remota_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +46,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Registro',
+      title: 'Gradus',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -91,13 +94,120 @@ class _RootScreenState extends State<RootScreen> {
     _lezioni = _lezioniBox.values.toList();
     _compiti = _compitiBox.values.toList();
 
-    // Mostra benvenuto se il nome non è stato ancora inserito
     _primoAvvio = _nomeStudente.isEmpty;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await NotificationService().richiediPermessi();
       await NotificationService().schedulaTutteLeNotifiche(_compiti);
+      // Auto-sync with ClasseViva silently on app launch
+      await _autoSync();
     });
+  }
+
+  /// Silently syncs grades and agenda from ClasseViva on launch.
+  /// If not logged in or network fails, the app continues normally.
+  Future<void> _autoSync() async {
+    try {
+      final service = ClasseVivaService();
+      final loggedIn = await service.isLoggedIn();
+      if (!loggedIn) return;
+
+      // Sync grades
+      try {
+        final votiRemoti = await service.fetchVoti();
+        for (final m in _materie) {
+          m.voti.clear();
+        }
+        for (final vr in votiRemoti) {
+          final nomeMat = vr.subjectDesc
+              .trim()
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
+          if (nomeMat.isEmpty) continue;
+
+          Materia? materia;
+          try {
+            materia = _materie.firstWhere(
+              (m) => m.nome.toLowerCase().trim() == nomeMat.toLowerCase(),
+            );
+          } catch (_) {
+            materia = Materia(nome: nomeMat);
+            _materie.add(materia);
+          }
+
+          materia.voti.add(
+            Voto(
+              valore: vr.decimalValue,
+              data: vr.eventDate,
+              descrizione: vr.notes.isNotEmpty ? vr.notes : null,
+              tipo: _mapTipoVoto(vr.componentDesc),
+            ),
+          );
+        }
+
+        for (final m in _materie) {
+          m.voti.sort((a, b) => a.data.compareTo(b.data));
+        }
+      } catch (e) {
+        debugPrint('AutoSync grades error: $e');
+      }
+
+      // Sync agenda
+      try {
+        final now = DateTime.now();
+        final agendaRemota = await service.fetchAgenda(
+          from: now.subtract(const Duration(days: 30)),
+          to: now.add(const Duration(days: 60)),
+        );
+
+        _compiti.removeWhere((c) => c.importato);
+
+        for (final ar in agendaRemota) {
+          final oggi = DateTime(now.year, now.month, now.day);
+          if (ar.end.isBefore(oggi)) continue;
+          if (ar.notes.trim().isEmpty && ar.subjectDesc.trim().isEmpty) {
+            continue;
+          }
+
+          _compiti.add(
+            Compito(
+              materia: ar.subjectDesc.trim().isNotEmpty
+                  ? ar.subjectDesc.trim()
+                  : ar.authorName.trim(),
+              descrizione: ar.notes.trim().isNotEmpty
+                  ? ar.notes.trim()
+                  : ar.evtCode,
+              dataConsegna: ar.end,
+              tipo: _mapTipoCompito(ar.evtCode),
+              importato: true,
+            ),
+          );
+        }
+
+        _compiti.sort((a, b) => a.dataConsegna.compareTo(b.dataConsegna));
+      } catch (e) {
+        debugPrint('AutoSync agenda error: $e');
+      }
+
+      _onUpdate();
+    } catch (e) {
+      debugPrint('AutoSync error: $e');
+    }
+  }
+
+  /// Maps ClasseViva component description to internal grade type.
+  String _mapTipoVoto(String componentDesc) {
+    final lower = componentDesc.toLowerCase();
+    if (lower.contains('oral')) return 'orale';
+    if (lower.contains('prat')) return 'pratico';
+    return 'scritto';
+  }
+
+  /// Maps ClasseViva event code to TipoCompito.
+  TipoCompito _mapTipoCompito(String evtCode) {
+    if (evtCode == 'AGHW') return TipoCompito.compito;
+    if (evtCode == 'AGNT') return TipoCompito.verifica;
+    return TipoCompito.compito;
   }
 
   Future<void> _salva() async {
@@ -207,7 +317,6 @@ class _RootScreenState extends State<RootScreen> {
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 230),
         transitionBuilder: (child, animation) {
-          // Slide dal basso verso l'alto + fade
           return FadeTransition(
             opacity: animation,
             child: SlideTransition(

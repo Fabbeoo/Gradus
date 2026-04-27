@@ -159,6 +159,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
               DropdownButtonFormField<String>(
                 value: materiaScelta,
                 hint: const Text('Seleziona materia'),
+                isExpanded: true, // questa riga risolve l'overflow
                 decoration: InputDecoration(
                   labelText: 'Materia',
                   border: OutlineInputBorder(
@@ -167,8 +168,10 @@ class _OrarioScreenState extends State<OrarioScreen> {
                 ),
                 items: widget.materie
                     .map(
-                      (m) =>
-                          DropdownMenuItem(value: m.nome, child: Text(m.nome)),
+                      (m) => DropdownMenuItem(
+                        value: m.nome,
+                        child: Text(m.nome, overflow: TextOverflow.ellipsis),
+                      ),
                     )
                     .toList(),
                 onChanged: (val) => setModalState(() => materiaScelta = val),
@@ -185,7 +188,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Color selector for the lesson block
               const Text('Colore:', style: TextStyle(fontSize: 15)),
               const SizedBox(height: 10),
               Wrap(
@@ -228,7 +230,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Control to set how many consecutive hours this lesson should span
               Row(
                 children: [
                   const Text(
@@ -266,7 +267,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
                       child: OutlinedButton(
                         onPressed: () {
                           setState(() {
-                            // Remove all hours that belong to this block
                             final blocchi = _raggruppaOre(giorno);
                             final blocco = blocchi.firstWhere(
                               (b) =>
@@ -342,13 +342,11 @@ class _OrarioScreenState extends State<OrarioScreen> {
     );
   }
 
-  // Build the single-day view with blocks for each hour
   Widget _buildVistaSingola(String giorno) {
     final blocchi = _raggruppaOre(giorno);
     final haLezioni = blocchi.any((b) => b['lezione'] != null);
 
     return GestureDetector(
-      // Swipe left = next day, swipe right = previous day
       onHorizontalDragEnd: (details) {
         final index = _giorni.indexOf(giorno);
         if (details.primaryVelocity == null) return;
@@ -360,7 +358,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
       },
       child: Column(
         children: [
-          // Header giorno con frecce
           Container(
             margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -410,7 +407,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
             ),
           ),
 
-          // Lista blocchi ore
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -426,7 +422,8 @@ class _OrarioScreenState extends State<OrarioScreen> {
                 return GestureDetector(
                   onTap: () => _modificaSlot(giorno, ora),
                   child: Container(
-                    height: altezza,
+                    // Use minHeight instead of fixed height to prevent overflow
+                    constraints: BoxConstraints(minHeight: altezza),
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -441,11 +438,13 @@ class _OrarioScreenState extends State<OrarioScreen> {
                       ),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: 30,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
                             children: List.generate(
                               durata,
                               (j) => Text(
@@ -463,6 +462,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
                           child: lezione != null
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -472,6 +472,8 @@ class _OrarioScreenState extends State<OrarioScreen> {
                                         fontWeight: FontWeight.bold,
                                         color: colore,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     if (lezione.aula != null)
                                       Text(
@@ -513,7 +515,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
             ),
           ),
 
-          // Button to switch to full weekly view
           Padding(
             padding: const EdgeInsets.all(16),
             child: SizedBox(
@@ -530,7 +531,6 @@ class _OrarioScreenState extends State<OrarioScreen> {
     );
   }
 
-  // Build the full timetable view showing all days and hours in a grid
   Widget _buildVistaCompleta() {
     return Column(
       children: [
@@ -617,6 +617,7 @@ class _OrarioScreenState extends State<OrarioScreen> {
                                           Text(
                                             lezione.materia,
                                             textAlign: TextAlign.center,
+                                            maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 11,

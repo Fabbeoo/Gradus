@@ -36,17 +36,20 @@ class HomeScreen extends StatelessWidget {
   // Compute the overall average across subjects that have grades.
   double _mediaGenerale(List<Materia> materie) {
     final periodo = Materia.periodoCorrente();
+    final con = materie.where((m) {
+      final voti = periodo == 0 ? m.primoperiodo : m.secondoperiodo;
+      return voti.isNotEmpty;
+    }).toList();
 
-    // Collect all individual grades from the current period
-    final votiPeriodo = materie
-        .expand((m) => periodo == 0 ? m.primoperiodo : m.secondoperiodo)
-        .toList();
+    if (con.isEmpty) return 0;
 
-    if (votiPeriodo.isEmpty) return 0;
+    // Average of averages, same as the Materie screen
+    final medie = con.map((m) {
+      final voti = periodo == 0 ? m.primoperiodo : m.secondoperiodo;
+      return voti.map((v) => v.valore).reduce((a, b) => a + b) / voti.length;
+    });
 
-    // True average of all grades, not average of averages
-    return votiPeriodo.map((v) => v.valore).reduce((a, b) => a + b) /
-        votiPeriodo.length;
+    return medie.reduce((a, b) => a + b) / con.length;
   }
 
   // Compute a simple overall trend: 1 up, -1 down, 0 stable.

@@ -41,7 +41,7 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
       'color': Colors.orange,
       'titolo': 'Agenda',
       'descrizione':
-          'Compiti, verifiche e interrogazioni vengono importati da ClasseViva ma puoi aggiungerne di manuali. Ricevi notifiche il giorno prima e il giorno stesso.',
+          'Compiti, verifiche e interrogazioni vengono importati da ClasseViva ma puoi aggiungerne di manuali.',
     },
     {
       'icon': Icons.sync,
@@ -130,74 +130,79 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: colore.withOpacity(0.15),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: colore.withOpacity(0.3),
-                              width: 2,
+                    // SingleChildScrollView prevents overflow on small screens
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 24),
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: colore.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colore.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              pagina['icon'] as IconData,
+                              size: 60,
+                              color: colore,
                             ),
                           ),
-                          child: Icon(
-                            pagina['icon'] as IconData,
-                            size: 60,
-                            color: colore,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        Text(
-                          pagina['titolo'] as String,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          pagina['descrizione'] as String,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white54,
-                            height: 1.5,
-                          ),
-                        ),
-                        if (isUltima) ...[
                           const SizedBox(height: 40),
-                          TextField(
-                            controller: _nomeController,
-                            autofocus: false,
-                            textCapitalization: TextCapitalization.words,
+                          Text(
+                            pagina['titolo'] as String,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18),
-                            decoration: InputDecoration(
-                              hintText: 'Il tuo nome',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
-                              ),
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
-                            onSubmitted: (_) => _completa(),
                           ),
+                          const SizedBox(height: 16),
+                          Text(
+                            pagina['descrizione'] as String,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white54,
+                              height: 1.5,
+                            ),
+                          ),
+                          if (isUltima) ...[
+                            const SizedBox(height: 40),
+                            TextField(
+                              controller: _nomeController,
+                              autofocus: false,
+                              textCapitalization: TextCapitalization.words,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 18),
+                              decoration: InputDecoration(
+                                hintText: 'Il tuo nome',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 16,
+                                ),
+                              ),
+                              onSubmitted: (_) => _completa(),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
                         ],
-                      ],
+                      ),
                     ),
                   );
                 },
               ),
             ),
 
-            // Navigation buttons
+            // Navigation buttons — overflow:visible prevents word wrapping
             Padding(
               padding: const EdgeInsets.all(32),
               child: Row(
@@ -211,7 +216,12 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                             curve: Curves.easeInOut,
                           );
                         },
-                        child: const Text('Indietro'),
+                        child: const Text(
+                          'Indietro',
+                          maxLines: 1,
+                          overflow: TextOverflow.visible,
+                          softWrap: false,
+                        ),
                       ),
                     ),
                   if (_paginaCorrente > 0) const SizedBox(width: 12),
@@ -223,6 +233,9 @@ class _BenvenutoScreenState extends State<BenvenutoScreen> {
                         _paginaCorrente == _pagine.length - 1
                             ? 'Inizia!'
                             : 'Avanti',
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
+                        softWrap: false,
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
