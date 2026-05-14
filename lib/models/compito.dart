@@ -10,6 +10,8 @@ enum TipoCompito {
   verifica,
   @HiveField(2)
   interrogazione,
+  @HiveField(3)
+  comunicazione,
 }
 
 @HiveType(typeId: 4)
@@ -29,11 +31,12 @@ class Compito extends HiveObject {
   @HiveField(4)
   bool completato;
 
-  /// True if this entry was imported from ClasseViva.
-  /// Used to identify and remove stale imports on re-sync
-  /// without affecting manually added entries.
   @HiveField(5)
   bool importato;
+
+  /// Teacher name — populated when imported from ClasseViva.
+  @HiveField(6)
+  String autore;
 
   Compito({
     required this.materia,
@@ -42,5 +45,6 @@ class Compito extends HiveObject {
     this.tipo = TipoCompito.compito,
     this.completato = false,
     this.importato = false,
+    this.autore = '',
   });
 }

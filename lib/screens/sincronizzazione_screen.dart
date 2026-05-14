@@ -5,7 +5,7 @@ import '../models/lezione.dart';
 import '../models/compito.dart';
 
 /// Screen that handles the synchronization process with ClasseViva.
-/// Imports grades (replacing existing ones), timetable, and agenda events.
+/// Imports grades (replacing existing ones) and agenda events.
 /// Manual agenda entries are preserved alongside imported ones.
 class SincronizzazioneScreen extends StatefulWidget {
   final List<Materia> materie;
@@ -29,33 +29,20 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
   bool _loading = false;
   String? _error;
 
-  // Sync results
   int _votiImportati = 0;
   int _materieImportate = 0;
-  int _lezioniImportate = 0;
   int _compitiImportati = 0;
   bool _completato = false;
 
-  /// Maps Italian day name to its index used in [Lezione].
-  static const _giorniMap = {
-    1: 'Lun',
-    2: 'Mar',
-    3: 'Mer',
-    4: 'Gio',
-    5: 'Ven',
-    6: 'Sab',
-  };
-
-  /// Maps ClasseViva component description to our internal type string.
+  /// Maps ClasseViva component description to internal grade type.
   String _mapTipoVoto(String componentDesc) {
     final lower = componentDesc.toLowerCase();
     if (lower.contains('oral')) return 'orale';
     if (lower.contains('prat')) return 'pratico';
-    // 'Scritto/Grafico' and other written types
     return 'scritto';
   }
 
-  /// Maps ClasseViva event code to [TipoCompito].
+  /// Maps ClasseViva event code to TipoCompito.
   TipoCompito _mapTipoCompito(String evtCode) {
     if (evtCode == 'AGHW') return TipoCompito.compito;
     if (evtCode == 'AGNT') return TipoCompito.verifica;
@@ -69,7 +56,6 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
       _completato = false;
       _votiImportati = 0;
       _materieImportate = 0;
-      _lezioniImportate = 0;
       _compitiImportati = 0;
     });
 
@@ -80,20 +66,21 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
       try {
         final votiRemoti = await service.fetchVoti();
 
-        // Clear existing grades from all subjects
         for (final m in widget.materie) {
           m.voti.clear();
         }
 
         for (final vr in votiRemoti) {
-          final nomeMat = vr.subjectDesc.trim();
+          final nomeMat = vr.subjectDesc
+              .trim()
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
           if (nomeMat.isEmpty) continue;
 
-          // Find or create subject
           Materia? materia;
           try {
             materia = widget.materie.firstWhere(
-              (m) => m.nome.toLowerCase() == nomeMat.toLowerCase(),
+              (m) => m.nome.toLowerCase().trim() == nomeMat.toLowerCase(),
             );
           } catch (_) {
             materia = Materia(nome: nomeMat);
@@ -101,11 +88,6 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
             _materieImportate++;
           }
 
-          // Map periodPos to a date that falls in the correct semester.
-          // periodPos 1 = first period → use the actual evtDate
-          // periodPos 3 = second period (Pentamestre) → use the actual evtDate
-          // We keep the real date so our primoperiodo/secondoperiodo
-          // getters work correctly by month.
           materia.voti.add(
             Voto(
               valore: vr.decimalValue,
@@ -117,7 +99,6 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
           _votiImportati++;
         }
 
-        // Sort grades by date within each subject
         for (final m in widget.materie) {
           m.voti.sort((a, b) => a.data.compareTo(b.data));
         }
@@ -133,15 +114,15 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
           to: now.add(const Duration(days: 60)),
         );
 
-        // Remove ALL previously imported agenda items (identified by a flag)
-        // then re-add fresh ones — prevents duplicates on re-sync
+        // Remove only previously imported items, keep manual ones
         widget.compiti.removeWhere((c) => c.importato);
 
         for (final ar in agendaRemota) {
-          // Skip past events
-          if (ar.end.isBefore(DateTime(now.year, now.month, now.day))) continue;
-          if (ar.notes.trim().isEmpty && ar.subjectDesc.trim().isEmpty)
+          final oggi = DateTime(now.year, now.month, now.day);
+          if (ar.end.isBefore(oggi)) continue;
+          if (ar.notes.trim().isEmpty && ar.subjectDesc.trim().isEmpty) {
             continue;
+          }
 
           widget.compiti.add(
             Compito(
@@ -154,6 +135,7 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
               dataConsegna: ar.end,
               tipo: _mapTipoCompito(ar.evtCode),
               importato: true,
+              autore: ar.authorName.trim(),
             ),
           );
           _compitiImportati++;
@@ -215,7 +197,7 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
                   SizedBox(height: 6),
                   _InfoRow(
                     icon: Icons.schedule,
-                    text: 'Orario — sostituisce quello esistente',
+                    text: 'Orario — inserito manualmente dall\'utente',
                   ),
                   SizedBox(height: 6),
                   _InfoRow(
@@ -228,8 +210,8 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
 
             const SizedBox(height: 24),
 
-            // Results
-            if (_completato) ...[
+            // Results card
+            if (_completato)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -268,12 +250,6 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
                     ),
                     const SizedBox(height: 6),
                     _ResultRow(
-                      icon: Icons.schedule,
-                      label: 'Ore orario importate',
-                      value: '$_lezioniImportate',
-                    ),
-                    const SizedBox(height: 6),
-                    _ResultRow(
                       icon: Icons.assignment,
                       label: 'Eventi agenda importati',
                       value: '$_compitiImportati',
@@ -281,18 +257,9 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Torna al profilo'),
-                ),
-              ),
-            ],
 
-            // Error
-            if (_error != null) ...[
+            // Error card
+            if (_error != null)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -317,10 +284,18 @@ class _SincronizzazioneScreenState extends State<SincronizzazioneScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
 
             const Spacer(),
+
+            // Back button after completion
+            if (_completato)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Torna al profilo'),
+                ),
+              ),
 
             // Sync button
             if (!_completato)

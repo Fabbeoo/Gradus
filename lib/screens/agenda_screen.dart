@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/compito.dart';
 import '../models/materia.dart';
 
-// Screen that shows the agenda with subjects and tasks.
-// Allows adding, editing, completing, and deleting tasks.
+/// Screen that shows the agenda with subjects and tasks.
+/// Allows adding, editing, completing, and deleting tasks.
 class AgendaScreen extends StatefulWidget {
   final List<Materia> materie;
   final List<Compito> compiti;
@@ -21,18 +21,9 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
-  // Open the form to add a new task.
-  void _aggiungiCompito() {
-    _apriForm();
-  }
+  void _aggiungiCompito() => _apriForm();
+  void _modificaCompito(Compito compito) => _apriForm(compito: compito);
 
-  // Open the form to edit an existing task.
-  void _modificaCompito(Compito compito) {
-    _apriForm(compito: compito);
-  }
-
-  // Show a bottom sheet form to add or edit a task.
-  // The form includes type, subject, description, and date.
   void _apriForm({Compito? compito}) {
     if (widget.materie.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,35 +72,76 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Type selector: choose task, test, or oral exam.
-              SegmentedButton<TipoCompito>(
-                segments: const [
-                  ButtonSegment(
+              // Type dropdown with all four types
+              DropdownButtonFormField<TipoCompito>(
+                value: tipoScelto,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Tipo',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
                     value: TipoCompito.compito,
-                    label: Text('Compito'),
-                    icon: Icon(Icons.assignment),
+                    child: Row(
+                      children: [
+                        Icon(Icons.assignment, size: 18, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        const Text('Compito'),
+                      ],
+                    ),
                   ),
-                  ButtonSegment(
+                  DropdownMenuItem(
                     value: TipoCompito.verifica,
-                    label: Text('Verifica'),
-                    icon: Icon(Icons.edit_document),
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_document, size: 18, color: Colors.red),
+                        const SizedBox(width: 8),
+                        const Text('Verifica'),
+                      ],
+                    ),
                   ),
-                  ButtonSegment(
+                  DropdownMenuItem(
                     value: TipoCompito.interrogazione,
-                    label: Text('Interrog.'),
-                    icon: Icon(Icons.record_voice_over),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.record_voice_over,
+                          size: 18,
+                          color: Colors.orange,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Interrogazione'),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: TipoCompito.comunicazione,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.campaign_outlined,
+                          size: 18,
+                          color: Colors.teal,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Comunicazione'),
+                      ],
+                    ),
                   ),
                 ],
-                selected: {tipoScelto},
-                onSelectionChanged: (val) =>
-                    setModalState(() => tipoScelto = val.first),
+                onChanged: (val) => setModalState(
+                  () => tipoScelto = val ?? TipoCompito.compito,
+                ),
               ),
               const SizedBox(height: 12),
 
-              // Subject dropdown: pick the subject for the task.
+              // Subject dropdown
               DropdownButtonFormField<String>(
                 value: materiaScelta,
-                isExpanded: true, // aggiunge questa riga
+                isExpanded: true,
                 decoration: InputDecoration(
                   labelText: 'Materia',
                   border: OutlineInputBorder(
@@ -128,7 +160,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Description field: short text about the task.
+              // Description field
               TextField(
                 controller: descrizioneController,
                 maxLines: 2,
@@ -141,7 +173,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Date picker: show and change the due date.
+              // Date picker
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_today),
@@ -172,13 +204,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     if (descrizioneController.text.trim().isEmpty) return;
                     setState(() {
                       if (isModifica) {
-                        // Update the existing task fields directly.
                         compito.materia = materiaScelta!;
                         compito.descrizione = descrizioneController.text.trim();
                         compito.dataConsegna = dataScelta;
                         compito.tipo = tipoScelto;
                       } else {
-                        // Create a new task and add it to the list.
                         widget.compiti.add(
                           Compito(
                             materia: materiaScelta!,
@@ -188,7 +218,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
                           ),
                         );
                       }
-                      // Keep tasks sorted by due date.
                       widget.compiti.sort(
                         (a, b) => a.dataConsegna.compareTo(b.dataConsegna),
                       );
@@ -206,13 +235,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
     );
   }
 
-  // Remove a task by index and notify parent.
   void _eliminaCompito(int index) {
     setState(() => widget.compiti.removeAt(index));
     widget.onUpdate();
   }
 
-  // Return a color based on the task type.
   Color _colorePerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -221,10 +248,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
         return Colors.red;
       case TipoCompito.interrogazione:
         return Colors.orange;
+      case TipoCompito.comunicazione:
+        return Colors.teal;
     }
   }
 
-  // Return an icon based on the task type.
   IconData _iconaPerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -233,10 +261,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
         return Icons.edit_document;
       case TipoCompito.interrogazione:
         return Icons.record_voice_over;
+      case TipoCompito.comunicazione:
+        return Icons.campaign_outlined;
     }
   }
 
-  // Return a short label for the task type.
   String _labelPerTipo(TipoCompito tipo) {
     switch (tipo) {
       case TipoCompito.compito:
@@ -245,10 +274,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
         return 'Verifica';
       case TipoCompito.interrogazione:
         return 'Interrogazione';
+      case TipoCompito.comunicazione:
+        return 'Comunicazione';
     }
   }
 
-  // Format the date as "Today", "Tomorrow", or day/month/year.
   String _formatData(DateTime data) {
     final oggi = DateTime.now();
     final domani = DateTime.now().add(const Duration(days: 1));
@@ -257,13 +287,236 @@ class _AgendaScreenState extends State<AgendaScreen> {
     return '${data.day}/${data.month}/${data.year}';
   }
 
-  // Check if the date is before today (expired).
   bool _isScaduto(DateTime data) {
     final oggi = DateTime.now();
     return data.isBefore(DateTime(oggi.year, oggi.month, oggi.day));
   }
 
-  // Build the visual card for a single task.
+  /// Opens a detail bottom sheet for the selected task.
+  void _apriDettaglio(Compito compito) {
+    final colore = _colorePerTipo(compito.tipo);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.grey[900],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(24),
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Type badge + complete button
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colore.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: colore.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _iconaPerTipo(compito.tipo),
+                        size: 14,
+                        color: colore,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _labelPerTipo(compito.tipo),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colore,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () {
+                    setState(() => compito.completato = !compito.completato);
+                    widget.onUpdate();
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: compito.completato
+                          ? Colors.green.withOpacity(0.15)
+                          : Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: compito.completato
+                            ? Colors.green.withOpacity(0.4)
+                            : Colors.white24,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          compito.completato
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          size: 14,
+                          color: compito.completato
+                              ? Colors.green
+                              : Colors.white54,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          compito.completato ? 'Completato' : 'Da fare',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: compito.completato
+                                ? Colors.green
+                                : Colors.white54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Subject
+            Text(
+              compito.materia,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+
+            // Teacher name
+            if (compito.autore.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                compito.autore,
+                style: const TextStyle(fontSize: 14, color: Colors.white54),
+              ),
+            ],
+
+            const SizedBox(height: 20),
+
+            // Date
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 18,
+                    color: Colors.white54,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '${compito.dataConsegna.day}/${compito.dataConsegna.month}/${compito.dataConsegna.year}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _formatData(compito.dataConsegna),
+                    style: const TextStyle(fontSize: 13, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Description
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: Text(
+                compito.descrizione,
+                style: const TextStyle(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Edit / Delete buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _modificaCompito(compito);
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    label: const Text('Modifica'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      final index = widget.compiti.indexOf(compito);
+                      Navigator.pop(context);
+                      _eliminaCompito(index);
+                    },
+                    icon: const Icon(Icons.delete_outline, size: 16),
+                    label: const Text('Elimina'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCard(Compito compito, int index) {
     final colore = _colorePerTipo(compito.tipo);
     final scaduto = _isScaduto(compito.dataConsegna);
@@ -284,127 +537,123 @@ class _AgendaScreenState extends State<AgendaScreen> {
         _eliminaCompito(index);
         return false;
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: scaduto
-              ? Colors.red.withOpacity(0.05)
-              : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
+      child: GestureDetector(
+        onTap: () => _apriDettaglio(compito),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
             color: scaduto
-                ? Colors.red.withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Checkbox
-            GestureDetector(
-              onTap: () {
-                setState(() => compito.completato = !compito.completato);
-                widget.onUpdate();
-              },
-              child: compito.completato
-                  ? const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 26,
-                    )
-                  : Container(
-                      width: 26,
-                      height: 26,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colore, width: 2),
-                      ),
-                    ),
+                ? Colors.red.withOpacity(0.05)
+                : Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: scaduto
+                  ? Colors.red.withOpacity(0.3)
+                  : Colors.white.withOpacity(0.1),
             ),
-            const SizedBox(width: 12),
-
-            // Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        _iconaPerTipo(compito.tipo),
-                        size: 14,
-                        color: colore,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _labelPerTipo(compito.tipo),
-                        style: TextStyle(fontSize: 12, color: colore),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          compito.materia,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white54,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Checkbox
+              GestureDetector(
+                onTap: () {
+                  setState(() => compito.completato = !compito.completato);
+                  widget.onUpdate();
+                },
+                child: compito.completato
+                    ? const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 26,
+                      )
+                    : Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colore, width: 2),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    compito.descrizione,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      decoration: compito.completato
-                          ? TextDecoration.lineThrough
-                          : null,
-                      color: compito.completato ? Colors.white38 : Colors.white,
+              ),
+              const SizedBox(width: 12),
+
+              // Info: teacher/subject + description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          _iconaPerTipo(compito.tipo),
+                          size: 14,
+                          color: colore,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            // Show teacher if available and different from subject,
+                            // otherwise show subject name
+                            compito.autore.isNotEmpty &&
+                                    compito.autore.toLowerCase() !=
+                                        compito.materia.toLowerCase()
+                                ? '${compito.autore} · ${compito.materia}'
+                                : compito.autore.isNotEmpty
+                                ? compito.autore
+                                : compito.materia,
+                            style: TextStyle(fontSize: 12, color: colore),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 4),
+                    Text(
+                      compito.descrizione,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        decoration: compito.completato
+                            ? TextDecoration.lineThrough
+                            : null,
+                        color: compito.completato
+                            ? Colors.white38
+                            : Colors.white,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Date column
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _formatData(compito.dataConsegna),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: scaduto ? Colors.red : Colors.white54,
+                    ),
                   ),
+                  if (scaduto && !compito.completato)
+                    const Text(
+                      'Scaduto',
+                      style: TextStyle(fontSize: 11, color: Colors.red),
+                    ),
                 ],
               ),
-            ),
-
-            const SizedBox(width: 8),
-
-            // Data + edit
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _formatData(compito.dataConsegna),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: scaduto ? Colors.red : Colors.white54,
-                  ),
-                ),
-                if (scaduto && !compito.completato)
-                  const Text(
-                    'Scaduto',
-                    style: TextStyle(fontSize: 11, color: Colors.red),
-                  ),
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: () => _modificaCompito(compito),
-                  child: const Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: Colors.white38,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -436,7 +685,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Nessun compito',
+                    'Nessun elemento',
                     style: TextStyle(fontSize: 20, color: Colors.white38),
                   ),
                   SizedBox(height: 8),

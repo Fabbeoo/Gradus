@@ -180,6 +180,8 @@ class HomeScreen extends StatelessWidget {
         return 'Interrogazione';
       case TipoCompito.compito:
         return 'Compito';
+      case TipoCompito.comunicazione:
+        return 'Comunicazione';
     }
   }
 
@@ -192,6 +194,8 @@ class HomeScreen extends StatelessWidget {
         return Colors.orange;
       case TipoCompito.compito:
         return Colors.blue;
+      case TipoCompito.comunicazione:
+        return Colors.teal;
     }
   }
 

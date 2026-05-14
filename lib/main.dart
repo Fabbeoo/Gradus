@@ -68,7 +68,7 @@ class RootScreen extends StatefulWidget {
   State<RootScreen> createState() => _RootScreenState();
 }
 
-class _RootScreenState extends State<RootScreen> {
+class _RootScreenState extends State<RootScreen> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _primoAvvio = false;
   late String _nomeStudente;
@@ -81,9 +81,15 @@ class _RootScreenState extends State<RootScreen> {
   late Box<Compito> _compitiBox;
   late Box _impostazioniBox;
 
+  /// Tracks the last sync time to avoid syncing too frequently
+  /// when the app comes back to foreground multiple times.
+  DateTime? _ultimaSync;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _materieBox = Hive.box<Materia>('materie');
     _lezioniBox = Hive.box<Lezione>('lezioni');
     _compitiBox = Hive.box<Compito>('compiti');
@@ -99,12 +105,34 @@ class _RootScreenState extends State<RootScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await NotificationService().richiediPermessi();
       await NotificationService().schedulaTutteLeNotifiche(_compiti);
-      // Auto-sync with ClasseViva silently on app launch
       await _autoSync();
     });
   }
 
-  /// Silently syncs grades and agenda from ClasseViva on launch.
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Triggered every time the app lifecycle state changes.
+  /// Syncs when the app comes back to foreground,
+  /// but only if at least 5 minutes have passed since the last sync.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final now = DateTime.now();
+      final sinceLastSync = _ultimaSync == null
+          ? const Duration(hours: 1)
+          : now.difference(_ultimaSync!);
+
+      if (sinceLastSync.inMinutes >= 5) {
+        _autoSync();
+      }
+    }
+  }
+
+  /// Silently syncs grades and agenda from ClasseViva.
   /// If not logged in or network fails, the app continues normally.
   Future<void> _autoSync() async {
     try {
@@ -180,6 +208,7 @@ class _RootScreenState extends State<RootScreen> {
               dataConsegna: ar.end,
               tipo: _mapTipoCompito(ar.evtCode),
               importato: true,
+              autore: ar.authorName.trim(),
             ),
           );
         }
@@ -189,6 +218,7 @@ class _RootScreenState extends State<RootScreen> {
         debugPrint('AutoSync agenda error: $e');
       }
 
+      _ultimaSync = DateTime.now();
       _onUpdate();
     } catch (e) {
       debugPrint('AutoSync error: $e');

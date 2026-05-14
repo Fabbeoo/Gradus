@@ -325,7 +325,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
                   _exportTile(
                     icon: Icons.sync,
                     label: 'Sincronizza ora',
-                    sublabel: 'Importa voti, orario e agenda da ClasseViva',
+                    sublabel: 'Importa voti e agenda da ClasseViva',
                     colore: Colors.blue,
                     onTap: () async {
                       await Navigator.push(
@@ -357,7 +357,7 @@ class _ProfiloScreenState extends State<ProfiloScreen> {
             : _exportTile(
                 icon: Icons.login,
                 label: 'Accedi a ClasseViva',
-                sublabel: 'Importa voti, orario e agenda automaticamente',
+                sublabel: 'Importa voti e agenda automaticamente',
                 colore: Colors.blue,
                 onTap: () async {
                   await Navigator.push(

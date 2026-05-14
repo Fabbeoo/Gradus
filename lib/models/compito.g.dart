@@ -23,13 +23,14 @@ class CompitoAdapter extends TypeAdapter<Compito> {
       tipo: fields[3] as TipoCompito,
       completato: fields[4] as bool? ?? false,
       importato: fields[5] as bool? ?? false,
+      autore: fields[6] as String? ?? '',
     );
   }
 
   @override
   void write(BinaryWriter writer, Compito obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.materia)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class CompitoAdapter extends TypeAdapter<Compito> {
       ..writeByte(4)
       ..write(obj.completato)
       ..writeByte(5)
-      ..write(obj.importato);
+      ..write(obj.importato)
+      ..writeByte(6)
+      ..write(obj.autore);
   }
 
   @override
@@ -68,6 +71,8 @@ class TipoCompitoAdapter extends TypeAdapter<TipoCompito> {
         return TipoCompito.verifica;
       case 2:
         return TipoCompito.interrogazione;
+      case 3:
+        return TipoCompito.comunicazione;
       default:
         return TipoCompito.compito;
     }
@@ -84,6 +89,9 @@ class TipoCompitoAdapter extends TypeAdapter<TipoCompito> {
         break;
       case TipoCompito.interrogazione:
         writer.writeByte(2);
+        break;
+      case TipoCompito.comunicazione:
+        writer.writeByte(3);
         break;
     }
   }
